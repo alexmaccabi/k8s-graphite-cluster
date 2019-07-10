@@ -13,7 +13,6 @@ spec:
       containers:
         - name: graphite
           image: alexmdoc/graphite-master
-          imagePullPolicy: Always
           resources:
             requests:
               cpu: 300m

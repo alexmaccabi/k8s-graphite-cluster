@@ -13,7 +13,6 @@ spec:
       containers:
         - name: carbon-relay
           image: alexmdoc/carbon-relay
-          imagePullPolicy: Always
           ports:
           - containerPort: 2003
             name: plaintext

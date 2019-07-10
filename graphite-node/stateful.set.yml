@@ -20,7 +20,6 @@ spec:
       containers:
       - name: graphite-node
         image: alexmdoc/graphite-node:release-memcache-redis
-        imagePullPolicy: Always
         env:
           - name: CURATOR_RETENTION
             value: "1460"
