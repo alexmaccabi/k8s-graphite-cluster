@@ -19,7 +19,7 @@ spec:
       terminationGracePeriodSeconds: 10
       containers:
       - name: graphite-node
-        image: alexmdoc/graphite-node:release-memcache-redis
+        image: alexmdoc/graphite-node
         env:
           - name: CURATOR_RETENTION
             value: "1460"
