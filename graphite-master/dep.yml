@@ -1,0 +1,33 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: graphite
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        component: graphite
+        app: graphite
+    spec:
+      containers:
+        - name: graphite
+          image: alexmdoc/graphite-master
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: 300m
+              memory: 512Mi
+          ports:
+          - containerPort: 80
+            name: http
+            protocol: TCP
+          volumeMounts:
+          - name: config-volume
+            mountPath: /opt/graphite/conf
+      serviceAccountName: graphite-cluster-sa
+      volumes:
+        - name: config-volume
+          configMap:
+            name: graphite-config
+            defaultMode: 420

@@ -1,0 +1,59 @@
+apiVersion: apps/v1 #apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: graphite-node
+spec:
+  selector:
+    matchLabels:
+      app: graphite-node # Label selector that determines which Pods belong to the StatefulSet
+                 # Must match spec: template: metadata: labels
+  serviceName: graphite-node
+  podManagementPolicy: Parallel
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        component: graphite
+        app: graphite-node
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: graphite-node
+        image: alexmdoc/graphite-node:release-memcache-redis
+        imagePullPolicy: Always
+        env:
+          - name: CURATOR_RETENTION
+            value: "1460"
+        resources:
+          requests:
+            cpu: 1200m
+            memory: 16Gi
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        - containerPort: 2004
+          name: pickle
+          protocol: TCP
+        volumeMounts:
+        - name: graphite-node-pv
+          mountPath: /opt/graphite/storage/whisper
+        - name: config-volume
+          mountPath: /opt/graphite/conf
+      volumes:
+        - name: config-volume
+          configMap:
+            name: graphite-config
+            defaultMode: 420
+  volumeClaimTemplates:
+  - metadata:
+      name: graphite-node-pv
+      labels:
+        component: graphite
+        app: graphite-node
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "standard"
+      resources:
+        requests:
+          storage: 100Gi

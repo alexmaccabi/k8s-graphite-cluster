@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: graphite-node
+  labels:
+    app: graphite-node
+    component: graphite
+spec:
+  clusterIP: None
+  selector:
+    app: graphite-node
+  ports:
+  - port: 80
+    name: http
+    protocol: TCP
+  - port: 2004
+    name: pickle
+    protocol: TCP
