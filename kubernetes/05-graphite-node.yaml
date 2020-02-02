@@ -1,0 +1,75 @@
+apiVersion: apps/v1 #apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: graphite-node
+spec:
+  selector:
+    matchLabels:
+      app: graphite-node
+  serviceName: graphite-node
+  podManagementPolicy: Parallel
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        component: graphite
+        app: graphite-node
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: graphite-node
+        image: mdemri/graphite-node
+        env:
+          - name: CURATOR_RETENTION
+            value: "1460"
+        resources:
+          requests:
+            cpu: 1000m
+            memory: 8Gi
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        - containerPort: 2004
+          name: pickle
+          protocol: TCP
+        volumeMounts:
+        - name: graphite-node-pv
+          mountPath: /opt/graphite/storage/whisper
+        - name: config-volume
+          mountPath: /opt/graphite/conf
+      volumes:
+        - name: config-volume
+          configMap:
+            name: graphite-config
+            defaultMode: 420
+  volumeClaimTemplates:
+  - metadata:
+      name: graphite-node-pv
+      labels:
+        component: graphite
+        app: graphite-node
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 100Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: graphite-node
+  labels:
+    app: graphite-node
+    component: graphite
+spec:
+  clusterIP: None
+  selector:
+    app: graphite-node
+  ports:
+  - port: 80
+    name: http
+    protocol: TCP
+  - port: 2004
+    name: pickle
+    protocol: TCP
