@@ -1,0 +1,53 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: carbon-relay
+  namespace: monitoring
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        component: graphite
+        app: carbon-relay
+    spec:
+      containers:
+        - name: carbon-relay
+          image: mdemri/carbon-relay
+          ports:
+          - containerPort: 2003
+            name: plaintext
+            protocol: TCP
+          - containerPort: 2004
+            name: pickle
+            protocol: TCP
+          resources:
+            requests:
+              cpu: 300m
+              memory: 512Mi
+            limits:
+              cpu: 2000m
+              memory: 4096Mi
+      serviceAccountName: graphite-cluster-sa
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: carbon-relay
+  namespace: monitoring
+  labels:
+     role: proxy
+     cluster: statsd
+spec:
+  type: ClusterIP
+  selector:
+    app: carbon-relay
+  ports:
+  - port: 2003
+    name: plaintext
+    targetPort: 2003
+    protocol: TCP
+  - port: 2004
+    name: pickle
+    targetPort: 2004
+    protocol: TCP

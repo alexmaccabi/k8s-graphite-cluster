@@ -2,11 +2,11 @@ apiVersion: apps/v1 #apps/v1beta1
 kind: StatefulSet
 metadata:
   name: graphite-node
+  namespace: monitoring
 spec:
   selector:
     matchLabels:
-      app: graphite-node # Label selector that determines which Pods belong to the StatefulSet
-                 # Must match spec: template: metadata: labels
+      app: graphite-node
   serviceName: graphite-node
   podManagementPolicy: Parallel
   replicas: 3
@@ -19,14 +19,14 @@ spec:
       terminationGracePeriodSeconds: 10
       containers:
       - name: graphite-node
-        image: alexmdoc/graphite-node
+        image: mdemri/graphite-node
         env:
           - name: CURATOR_RETENTION
             value: "1460"
         resources:
           requests:
-            cpu: 1200m
-            memory: 16Gi
+            cpu: 1000m
+            memory: 8Gi
         ports:
         - containerPort: 80
           name: http
@@ -52,7 +52,26 @@ spec:
         app: graphite-node
     spec:
       accessModes: [ "ReadWriteOnce" ]
-      storageClassName: "standard"
       resources:
         requests:
           storage: 100Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: graphite-node
+  namespace: monitoring
+  labels:
+    app: graphite-node
+    component: graphite
+spec:
+  clusterIP: None
+  selector:
+    app: graphite-node
+  ports:
+  - port: 80
+    name: http
+    protocol: TCP
+  - port: 2004
+    name: pickle
+    protocol: TCP
