@@ -1,20 +1,9 @@
 FROM python:3-buster
 
-# RUN echo 'deb http://us.archive.ubuntu.com/ubuntu/ trusty universe' >> /etc/apt/sources.list
-
 RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
 RUN apt-get install -y  supervisor nginx-light cron
 ENV DEBIAN_FRONTEND=noninteractive
 ENV GRAPHITE_VERSION=1.1.6
-
-# Install required packages
-# RUN     apt-get -y update && \ 
-#     apt-get -y install software-properties-common python3.7 \
-#     python3.7-dev python3-pip python3-django-tagging python3-simplejson \
-#     python3-memcache python3-ldap python3-cairo python-pysqlite2 python-support  \
-#     gunicorn supervisor nginx-light git wget curl build-essential libffi-dev vim
-
-# RUN     cp /usr/bin/python3.7 /usr/bin/python
 
 RUN pip install wheel
 RUN pip install --upgrade setuptools
@@ -67,17 +56,16 @@ RUN chmod +x /etc/cron.d/curator.sh
 
 ADD entrypoint.sh /entrypoint.sh
 
-# RUN alias python=python3.7
 
 # Nginx
 EXPOSE	80
 # Carbon line receiver port
-# EXPOSE	2003
+EXPOSE	2003
 # Carbon UDP receiver port
-# EXPOSE	2003/udp
+EXPOSE	2003/udp
 # Carbon pickle receiver port
 EXPOSE	2004
 # Carbon cache query port
-# EXPOSE	7002
+EXPOSE	7002
 
 CMD	["/entrypoint.sh"]

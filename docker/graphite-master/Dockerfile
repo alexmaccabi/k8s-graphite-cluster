@@ -1,20 +1,10 @@
 FROM python:3.8-buster
 
-# RUN echo 'deb http://us.archive.ubuntu.com/ubuntu/ trusty universe' >> /etc/apt/sources.list
-
 RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
 RUN apt-get install -y nodejs supervisor nginx-light gcc
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV GRAPHITE_VERSION=1.1.6
-
-# Install required packages
-# RUN apt-get -y update && \ 
-#     apt-get -y install software-properties-common python3.7 python3.7 python3.7-dev \
-#     python-django-tagging python-simplejson \
-# 	python-memcache python-ldap python-cairo python-pysqlite2 python-support python3-pip \
-#     gunicorn supervisor nginx-light git wget curl build-essential python-dev libffi-dev vim jq
-
 
 RUN     pip install wheel
 RUN     pip install --upgrade setuptools
@@ -71,12 +61,12 @@ ADD entrypoint.sh /entrypoint.sh
 # Nginx
 EXPOSE	80
 # Carbon line receiver port
-# EXPOSE	2003
+EXPOSE	2003
 # Carbon UDP receiver port
-# EXPOSE	2003/udp
+EXPOSE	2003/udp
 # Carbon pickle receiver port
-# EXPOSE	2004
+EXPOSE	2004
 # Carbon cache query port
-# EXPOSE	7002
+EXPOSE	7002
 
 CMD	["/entrypoint.sh"]
