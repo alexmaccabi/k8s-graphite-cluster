@@ -1,3 +1,5 @@
 #!/bin/bash
 
-kubectl create configmap graphite-config --from-file=graphite-config --namespace monitoring
+NAMESPACE=$1
+
+kubectl create configmap graphite-config --from-file=graphite-config --namespace $NAMESPACE
