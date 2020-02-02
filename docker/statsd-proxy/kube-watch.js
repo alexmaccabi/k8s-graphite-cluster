@@ -21,7 +21,7 @@ function changeConfig(endpoints) {
 
 async function main() {
   await client.loadSpec();
-  const stream = client.apis.v1.ns(namespace).endpoints.getStream({ qs: { watch: true, fieldSelector: 'metadata.name=statsd-daemon' } });
+  const stream = client.api.v1.namespaces(namespace).endpoints.getStream({ qs: { watch: true, fieldSelector: 'metadata.name=statsd-daemon' } });
   stream.pipe(jsonStream);
   jsonStream.on('data', obj => {
     if (!obj) {

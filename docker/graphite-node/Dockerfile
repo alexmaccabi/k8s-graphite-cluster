@@ -1,39 +1,48 @@
-FROM ubuntu:18.04
+FROM python:3-buster
 
-RUN	echo 'deb http://us.archive.ubuntu.com/ubuntu/ trusty universe' >> /etc/apt/sources.list
+# RUN echo 'deb http://us.archive.ubuntu.com/ubuntu/ trusty universe' >> /etc/apt/sources.list
 
+RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
+RUN apt-get install -y  supervisor nginx-light cron
 ENV DEBIAN_FRONTEND=noninteractive
 ENV GRAPHITE_VERSION=1.1.6
 
 # Install required packages
-RUN     apt-get -y update && \ 
-    apt-get -y install software-properties-common python3.7 \
-    python3.7-dev python3-pip python3-django-tagging python3-simplejson \
-    python3-memcache python3-ldap python3-cairo python-pysqlite2 python-support  \
-	gunicorn supervisor nginx-light git wget curl build-essential libffi-dev vim
-RUN     python3.7 -m pip install "Twisted==13.2.0"
-RUN     python3.7 -m pip install pytz
+# RUN     apt-get -y update && \ 
+#     apt-get -y install software-properties-common python3.7 \
+#     python3.7-dev python3-pip python3-django-tagging python3-simplejson \
+#     python3-memcache python3-ldap python3-cairo python-pysqlite2 python-support  \
+#     gunicorn supervisor nginx-light git wget curl build-essential libffi-dev vim
+
+# RUN     cp /usr/bin/python3.7 /usr/bin/python
+
+RUN pip install wheel
+RUN pip install --upgrade setuptools
+RUN pip install gunicorn
+
+RUN     pip install "Twisted==19.10.0"
+RUN     pip install pytz
 RUN     git clone https://github.com/graphite-project/whisper.git /src/whisper            && \
         cd /src/whisper                                                                   && \
         git checkout ${GRAPHITE_VERSION}                                                  && \
-        python3.7 setup.py install
+        python setup.py install
 
 RUN     git clone https://github.com/graphite-project/carbon.git /src/carbon              && \
         cd /src/carbon                                                                    && \
         git checkout ${GRAPHITE_VERSION}                                                  && \
-        python3.7 setup.py install
+        python setup.py install
 
 
 RUN     git clone https://github.com/graphite-project/graphite-web.git /src/graphite-web  && \
         cd /src/graphite-web                                                              && \
         git checkout ${GRAPHITE_VERSION}								                  && \
-        python3.7 setup.py install                                                        && \
-        python3.7 -m pip install -r requirements.txt                                      && \
-        python3.7 check-dependencies.py
+        python setup.py install                                                           && \
+        pip install -r requirements.txt                                                   && \
+        python check-dependencies.py
 
 # fixes fatal error "Your WhiteNoise configuration is incompatible with WhiteNoise v4.0"
-RUN     /usr/bin/yes | python3.7 -m pip uninstall whitenoise                                           && \
-        python3.7 -m pip install "whitenoise<4"
+RUN     /usr/bin/yes | pip uninstall whitenoise                                           && \
+        pip install "whitenoise<4"
 
 # Add system service config
 ADD	./nginx/nginx.conf /etc/nginx/nginx.conf
@@ -57,6 +66,8 @@ ADD curator/run.sh /etc/cron.d/curator.sh
 RUN chmod +x /etc/cron.d/curator.sh
 
 ADD entrypoint.sh /entrypoint.sh
+
+# RUN alias python=python3.7
 
 # Nginx
 EXPOSE	80
